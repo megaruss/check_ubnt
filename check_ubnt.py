@@ -9,11 +9,10 @@ parser = argparse.ArgumentParser(description='Check for monitoring UBNT Radios')
 parser.add_argument('-H', help='UBNT radio address')
 parser.add_argument('-s', help='Use SSL',action="store_true")
 parser.add_argument('-S', help='Use SSL and ignore certificate warning', action="store_true")
-parser.add_argument('-U', help='username', default="ubnt")
-parser.add_argument('-P', help='password', default="ubnt")
-parser.add_argument('-w', help='warning threshold', type=float, default=80)
-parser.add_argument('-c', help='critical threshold', type=float, default=95)
-parser.add_argument('-i', help='signal strength warning;critical', default="70;80")
+parser.add_argument('-U', help='Username', default="ubnt")
+parser.add_argument('-P', help='Password', default="ubnt")
+parser.add_argument('-i', help='Signal strength warning;critical default < -70;-80', default="-70;-80")
+parser.add_argument('-j', help='CCQ warning;critical default < 80;50', default="80;50")
 
 args = parser.parse_args()
 
@@ -58,7 +57,13 @@ with requests.Session() as s:
 		info += "\nCapacity (TX/RX): " + str(values["airfiber"]["txcapacity"]/1024/1024) + "Mbps/" + str(values["airfiber"]["rxcapacity"]/1024/1024) + "Mbps"
 		info += "\nLink Uptime: " + str(datetime.timedelta(seconds=values["airfiber"]["linkuptime"])) 
 
-		perfdata += "'RX Chain0'=" + str(values["airfiber"]["rxpower0"]) + ";" + args.i + " 'RX Chain1'=" + str(values["airfiber"]["rxpower1"]) + ";" + args.i + " 'TX Chain0'=" + str(values["airfiber"]["remote_rxpower0"]) + ";" + args.i + " 'TX Chain1'=" + str(values["airfiber"]["remote_rxpower1"]) + ";" + args.i + " " 
+		perfdata += "'RX Chain0'=" + str(values["airfiber"]["rxpower0"]) + ";" + args.i 
+		perfdata += " 'RX Chain1'=" + str(values["airfiber"]["rxpower1"]) + ";" + args.i 
+		perfdata += " 'RX Capacity'=" + str(values["airfiber"]["rxcapacity"]/1024/1024)
+		perfdata += " 'TX Chain0'=" + str(values["airfiber"]["remote_rxpower0"]) + ";" + args.i 
+		perfdata += " 'TX Chain1'=" + str(values["airfiber"]["remote_rxpower1"]) + ";" + args.i
+		perfdata += " 'TX Capacity'=" + str(values["airfiber"]["txcapacity"]/1024/1024)
+
 	else: 
 		info += "\nFrequency: " + str(values["wireless"]["frequency"]) +"Mhz"
 		info += "\nChains: " + str(values["wireless"]["chains"])
@@ -66,10 +71,16 @@ with requests.Session() as s:
 		info += "\nRSSI: " + str(values["wireless"]["rssi"])
 		info += "\nNoise Floor: " + str(values["wireless"]["noisef"])
 		info += "\nCCQ: " + str(values["wireless"]["ccq"]/10)
-		info += "\nRate (TX/RX): " + str(values["wireless"]["txrate"]) + "/" + str(values["wireless"]["rxrate"])
+		info += "\nRate (TX/RX): " + str(values["wireless"]["txrate"]) + "Mbps/" + str(values["wireless"]["rxrate"]) + "Mbps"
 		info += "\nLink Distance: " + str(values["wireless"]["distance"])
 		info += "\nAirmax Quality: " + str(values["wireless"]["polling"]["quality"]) + "%"
 		info += "\nAirmax Capacity: " + str(values["wireless"]["polling"]["capacity"]) + "%"
+
+		perfdata += "'Signal Strength'=" + str(values["wireless"]["signal"]) + ";" + args.i 
+		perfdata += " 'Noise Floor'=" + str(values["wireless"]["noisef"]) 
+		perfdata += " 'CCQ'=" + str(values["wireless"]["ccq"]/10) + "%"
+		perfdata += " 'Airmax Quality'=" + str(values["wireless"]["polling"]["quality"]) + "%" 
+		perfdata += "' Airmax Capacity'=" + str(values["wireless"]["polling"]["capacity"]) + "%"
 
 	if "gps" in values.keys(): 
 		info += "\nLocation: " + str(values["gps"]["lat"]) + ", " + str(values["gps"]["lon"]) + "; Altitude: " + str(int(values["gps"]["alt"])) + "m"
