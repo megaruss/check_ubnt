@@ -94,6 +94,7 @@ with requests.Session() as s:
 			message += "One or more chains above warning signal threshold of " + str(sig_warn) + "\n"
 
 	else: 
+		print(json.dumps(values))
 		info += "\nFrequency: " + str(values["wireless"]["frequency"]) +"Mhz"
 		info += "\nChains: " + str(values["wireless"]["chains"])
 		info += "\nSignal Strength: " + str(values["wireless"]["signal"])
@@ -102,14 +103,18 @@ with requests.Session() as s:
 		info += "\nCCQ: " + str(values["wireless"]["ccq"]/10)
 		info += "\nRate (TX/RX): " + str(values["wireless"]["txrate"]) + "Mbps/" + str(values["wireless"]["rxrate"]) + "Mbps"
 		info += "\nLink Distance: " + str(values["wireless"]["distance"])
-		info += "\nAirmax Quality: " + str(values["wireless"]["polling"]["quality"]) + "%"
-		info += "\nAirmax Capacity: " + str(values["wireless"]["polling"]["capacity"]) + "%"
+		if "quality" in values["wireless"]["polling"]: 
+			info += "\nAirmax Quality: " + str(values["wireless"]["polling"]["quality"]) + "%"
+		if "capacity" in values["wireless"]["polling"]:
+			info += "\nAirmax Capacity: " + str(values["wireless"]["polling"]["capacity"]) + "%"
 
 		perfdata += "'Signal Strength'=" + str(values["wireless"]["signal"]) + ";" + str(sig_warn) + ";" + str(sig_crit)
 		perfdata += " 'Noise Floor'=" + str(values["wireless"]["noisef"]) 
 		perfdata += " 'CCQ'=" + str(values["wireless"]["ccq"]/10) + "%;" + str(ccq_warn) + ";" + str(ccq_crit)
-		perfdata += " 'Airmax Quality'=" + str(values["wireless"]["polling"]["quality"]) + "%" 
-		perfdata += " 'Airmax Capacity'=" + str(values["wireless"]["polling"]["capacity"]) + "%"
+		if "quality" in values["wireless"]["polling"]: 
+			perfdata += " 'Airmax Quality'=" + str(values["wireless"]["polling"]["quality"]) + "%" 
+		if "capacity" in values["wireless"]["polling"]:
+			perfdata += " 'Airmax Capacity'=" + str(values["wireless"]["polling"]["capacity"]) + "%"
 
 		if values["wireless"]["signal"] < sig_crit:
 			critical += 1
