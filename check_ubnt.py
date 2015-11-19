@@ -94,7 +94,6 @@ with requests.Session() as s:
 			message += "One or more chains above warning signal threshold of " + str(sig_warn) + "\n"
 
 	else: 
-		print(json.dumps(values))
 		info += "\nFrequency: " + str(values["wireless"]["frequency"]) +"Mhz"
 		info += "\nChains: " + str(values["wireless"]["chains"])
 		info += "\nSignal Strength: " + str(values["wireless"]["signal"])
